@@ -2,22 +2,25 @@
 
 Este roteiro cria a base compartilhada para que os dados deixem de ficar presos ao `localStorage` de cada celular.
 
-## 1. Criar o projeto
+## 1. Projeto
 
-1. Acesse `https://supabase.com`.
-2. Crie um projeto chamado `cine-up-os`.
-3. Guarde:
-   - `Project URL`
-   - `anon public key`
-4. Nunca compartilhe nem publique a `service_role key`.
+Projeto atual:
 
-## 2. Criar tabelas
+```txt
+SUPABASE_URL=https://gmrnoizmttjqxamygbhi.supabase.co
+SUPABASE_ANON_KEY=sb_publishable_dCxYGVnxYEyo_6wJ1foDZg_OGM581ac
+```
+
+Nunca compartilhe nem publique a `service_role key`.
+
+## 2. Criar Tabelas
 
 No Supabase:
 
 1. Abra `SQL Editor`.
 2. Cole o conteúdo de `supabase/cineup_schema_mvp.sql`.
 3. Execute o script.
+4. Depois cole e execute o conteúdo de `supabase/cineup_pendings_mvp_access.sql`.
 
 Esse schema cria as tabelas principais do MVP:
 
@@ -35,7 +38,7 @@ Esse schema cria as tabelas principais do MVP:
 - achados e perdidos;
 - progresso de treinamento.
 
-## 3. Criar buckets de arquivos
+## 3. Criar Buckets de Arquivos
 
 Em `Storage`, crie estes buckets:
 
@@ -44,9 +47,9 @@ Em `Storage`, crie estes buckets:
 - `achados-perdidos`
 - `notas-fiscais`
 
-Na primeira fase, vamos usar buckets privados e gerar caminhos salvos nas tabelas.
+Na primeira fase, vamos usar buckets privados e salvar caminhos nas tabelas.
 
-## 4. Configurar autenticação
+## 4. Autenticação
 
 Para o MVP sincronizado, há duas opções:
 
@@ -56,20 +59,11 @@ Criar logins por e-mail/senha no Supabase Auth e vincular esses usuários ao cad
 
 ### Opção B - Mais parecida com o app atual
 
-Manter login por nome/código/PIN no protótipo e usar uma credencial técnica limitada para sincronização.
+Manter login por nome/código/PIN no protótipo e usar permissões limitadas no banco.
 
-Eu recomendo começar pela Opção A para não deixar o banco aberto.
+Recomendação: começar pela opção A para não deixar o banco aberto.
 
-## 5. Variáveis para Netlify
-
-No painel do Netlify, configurar:
-
-- `VITE_SUPABASE_URL`
-- `VITE_SUPABASE_ANON_KEY`
-
-Se continuarmos no HTML único, podemos começar com configuração manual dentro do app, mas a versão correta é usar variáveis no build.
-
-## 6. Ordem segura de migração
+## 5. Ordem Segura de Migração
 
 Não devemos migrar tudo de uma vez. A ordem recomendada é:
 
@@ -83,16 +77,22 @@ Não devemos migrar tudo de uma vez. A ordem recomendada é:
 8. Relatórios.
 9. Fotos e evidências reais.
 
-## 7. Critério de sucesso da primeira Sprint
+## 6. Critério de Sucesso da Primeira Sprint
 
 A primeira Sprint Supabase estará correta quando:
 
 - um usuário criar pendência no celular A;
 - outro usuário visualizar essa pendência no celular B;
-- a liderança aprovar/reprovar;
+- a liderança aprovar ou reprovar;
 - ambos os celulares atualizarem o status;
-- o dado continuar salvo após limpar/cache/trocar aparelho.
+- o dado continuar salvo após limpar cache ou trocar de aparelho.
 
-## Observação importante
+## 7. Política Temporária do MVP
+
+O arquivo `supabase/cineup_pendings_mvp_access.sql` libera leitura, criação e atualização de pendências usando a publishable key.
+
+Isso é aceitável apenas para o protótipo interno. Quando ativarmos login real via Supabase Auth, essas políticas devem ser substituídas por regras por cargo, unidade e usuário.
+
+## Observação
 
 Hospedar no Netlify não sincroniza dados sozinho. O Netlify entrega o app. O Supabase será o banco compartilhado.
