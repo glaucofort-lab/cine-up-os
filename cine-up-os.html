@@ -2983,7 +2983,8 @@
     const settingsBeforeRemoteDb=settings;
     settings=function(){
       const panel=`<section class="panel"><h2>Banco geral Supabase</h2><p class="muted">${esc(state.remoteDbStatus||"Sincronização geral pronta. Todas as chaves cineup_* serão espelhadas no Supabase.")}</p><button class="primary" id="syncAllRemote">Sincronizar banco geral agora</button></section>`;
-      return settingsBeforeRemoteDb().replace("</main>",`${panel}</main>`);
+      const html=settingsBeforeRemoteDb();
+      return html.includes('<section class="actionList">')?html.replace('<section class="actionList">',`${panel}<section class="actionList">`):html.replace("</main>",`${panel}</main>`);
     };
     document.addEventListener("click",e=>{if(e.target?.id==="syncAllRemote"){state.remoteDbStatus="Sincronizando banco geral...";cineupSyncAllFromSupabase(true).then(()=>render())}});
 
