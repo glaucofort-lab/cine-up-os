@@ -13,86 +13,56 @@ SUPABASE_ANON_KEY=sb_publishable_dCxYGVnxYEyo_6wJ1foDZg_OGM581ac
 
 Nunca compartilhe nem publique a `service_role key`.
 
-## 2. Criar Tabelas
+## 2. Scripts SQL
 
-No Supabase:
+Execute no Supabase SQL Editor, nesta ordem:
 
-1. Abra `SQL Editor`.
-2. Cole o conteúdo de `supabase/cineup_schema_mvp.sql`.
-3. Execute o script.
-4. Depois cole e execute o conteúdo de `supabase/cineup_pendings_mvp_access.sql`.
+1. `supabase/cineup_schema_mvp.sql`
+2. `supabase/cineup_pendings_mvp_access.sql`
+3. `supabase/cineup_app_state_mvp.sql`
 
-Esse schema cria as tabelas principais do MVP:
+O terceiro script cria a tabela `app_state`, usada para espelhar todas as chaves `cineup_*` do protótipo.
 
-- unidades;
-- usuários internos;
-- vínculo usuário x praça;
-- tarefas;
-- pendências;
-- checklists;
-- plano de chão;
-- estoque;
-- movimentações;
-- rondas;
-- ocorrências;
-- achados e perdidos;
-- progresso de treinamento.
+## 3. Modelo de Sincronização Atual
 
-## 3. Criar Buckets de Arquivos
+Nesta fase, o app usa dois caminhos:
 
-Em `Storage`, crie estes buckets:
+- tabelas específicas para módulos já iniciados, como `pendings`;
+- tabela geral `app_state` para sincronizar todo o restante do protótipo sem reescrever cada módulo agora.
+
+O `localStorage` continua como fallback local. Quando o Supabase estiver disponível, o app:
+
+- baixa o estado remoto na abertura;
+- grava cada alteração local também no Supabase;
+- recarrega uma vez se encontrar dados remotos mais recentes.
+
+## 4. Buckets de Arquivos
+
+Em `Storage`, crie estes buckets quando começarmos fotos reais:
 
 - `evidencias`
 - `checklists`
 - `achados-perdidos`
 - `notas-fiscais`
 
-Na primeira fase, vamos usar buckets privados e salvar caminhos nas tabelas.
+Na fase atual, fotos ainda são evidências simuladas/textuais no protótipo.
 
-## 4. Autenticação
+## 5. Segurança
 
-Para o MVP sincronizado, há duas opções:
+As políticas atuais liberam acesso com a publishable key para viabilizar o teste interno do protótipo.
 
-### Opção A - Mais rápida para teste
+Antes de uso definitivo:
 
-Criar logins por e-mail/senha no Supabase Auth e vincular esses usuários ao cadastro interno depois.
+- ativar login real via Supabase Auth;
+- trocar políticas abertas por regras por cargo, unidade e usuário;
+- revisar buckets privados;
+- criar trilha de auditoria para ações críticas.
 
-### Opção B - Mais parecida com o app atual
+## 6. Critério de Sucesso
 
-Manter login por nome/código/PIN no protótipo e usar permissões limitadas no banco.
+A migração geral estará correta quando:
 
-Recomendação: começar pela opção A para não deixar o banco aberto.
-
-## 5. Ordem Segura de Migração
-
-Não devemos migrar tudo de uma vez. A ordem recomendada é:
-
-1. Pendências.
-2. Checklists.
-3. Plano de chão.
-4. Rondas e ocorrências.
-5. Achados e perdidos.
-6. Estoque.
-7. Ponto.
-8. Relatórios.
-9. Fotos e evidências reais.
-
-## 6. Critério de Sucesso da Primeira Sprint
-
-A primeira Sprint Supabase estará correta quando:
-
-- um usuário criar pendência no celular A;
-- outro usuário visualizar essa pendência no celular B;
-- a liderança aprovar ou reprovar;
-- ambos os celulares atualizarem o status;
-- o dado continuar salvo após limpar cache ou trocar de aparelho.
-
-## 7. Política Temporária do MVP
-
-O arquivo `supabase/cineup_pendings_mvp_access.sql` libera leitura, criação e atualização de pendências usando a publishable key.
-
-Isso é aceitável apenas para o protótipo interno. Quando ativarmos login real via Supabase Auth, essas políticas devem ser substituídas por regras por cargo, unidade e usuário.
-
-## Observação
-
-Hospedar no Netlify não sincroniza dados sozinho. O Netlify entrega o app. O Supabase será o banco compartilhado.
+- um usuário criar ou alterar dados em um celular;
+- outro usuário visualizar os mesmos dados em outro aparelho;
+- as alterações permanecerem salvas após limpar cache ou trocar de dispositivo;
+- pendências, checklists, plano de chão, estoque e demais registros preservarem estado compartilhado.
