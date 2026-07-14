@@ -397,7 +397,7 @@
       if(!state.selectedUser){
         const q=state.loginQuery.trim(),nq=norm(q),matches=q?USERS.filter(u=>norm(u.name).includes(nq)||userCode(u).includes(q)).slice(0,6):[];
         app.innerHTML=`<main class="login"><section class="brand">${logoImg()}<h1>Operação Rede Cine UP</h1><p>Rotina, equipe, estoque e padrão em um único app</p></section><section class="loginPanel"><h2>Acessar</h2><div class="accessBox"><input class="accessInput" id="loginSearch" value="${esc(state.loginQuery)}" placeholder="Digite seu nome ou código"><p class="accessHint">Ex.: Davi ou código 005. Depois informe seu PIN.</p></div>${q?matches.length?matches.map(u=>`<button class="userBtn" data-user="${u.id}"><span class="userCode">${userCode(u)}</span><span class="avatar">${u.name[0]}</span><span><strong>${u.name}</strong><small>${ROLE[u.role]} · ${u.locations.map(id=>LOCATIONS.find(l=>l.id===id).short).join(", ")}</small></span></button>`).join(""):`<div class="emptyAccess">Nenhum colaborador encontrado.</div>`:`<div class="emptyAccess">A lista aparece somente após digitar o nome ou código.</div>`}</section></main>`;
-        const search=document.getElementById("loginSearch");search.focus();search.oninput=()=>set({loginQuery:search.value});
+        const search=document.getElementById("loginSearch");search.focus();try{search.setSelectionRange(search.value.length,search.value.length)}catch{}search.oninput=()=>set({loginQuery:search.value});
         document.querySelectorAll("[data-user]").forEach(b=>b.onclick=()=>set({selectedUser:USERS.find(u=>u.id===b.dataset.user),pin:""}));return;
       }
       const dots=[0,1,2,3].map(i=>`<span class="${state.pin.length>i?"on":""}"></span>`).join("");
